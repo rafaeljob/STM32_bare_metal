@@ -18,7 +18,7 @@ static void SystemClock_Config(void);
 // Main program
 int main()
 {
-	uint8_t	sent;
+	uint32_t i;
 
 	// Configure System Clock
 	SystemClock_Config();
@@ -26,6 +26,10 @@ int main()
 	// Initialize Debug Console
 	BSP_Console_Init();
 	bm_printf("# Console ready\r\n");
+
+	// Initialize and start ADC on PC1
+	BSP_ADC_Init();
+	bm_printf("# ADC ready\r\n");
 
 	// Initialize LED & Button pin
 	BSP_LED_Init();
@@ -38,36 +42,27 @@ int main()
 	while(1)
 	{
 		// If User-Button is pushed down
-		if (BSP_PB_GetState() == 1)
-		{
-			BSP_LED_On();	// Keep LED On
-
-			// Send '#' only once
-			if (sent == 0)
-			{
-				while ((USART2->ISR & USART_ISR_TC) != USART_ISR_TC);
-				USART2->TDR = '#';
-				sent = 1;
-			}
-		}
-
-		// If User-Button is released
+		if (BSP_PB_GetState() == 1) { BSP_LED_On(); }
 		else
 		{
-			BSP_LED_Off();	// Keep LED Off
-			sent = 0;
+			BSP_LED_Off();
+			// Wait here until ADC EOC
+			while ((ADC1->ISR & ADC_ISR_EOC) != ADC_ISR_EOC);
+
+			// Report result to console
+			bm_printf("\tADC value = %d\r\n", ADC1->DR);
+
+			// Wait about 200ms
+			for (i=0; i<500000; i++);
 		}
 	}
 }
 
 
-/*
- * Clock configuration for the Nucleo STM32F072RB board
- * HSE input Bypass Mode            -> 8MHz
- * SYSCLK, AHB, APB1                -> 48MHz
- * PA8 as MCO with /16 prescaler    -> 3MHz
- */
-
+// Clock configuration for the Nucleo STM32F072RB board
+// HSE input Bypass Mode            -> 8MHz
+// SYSCLK, AHB, APB1                -> 48MHz
+// PA8 as MCO with /16 prescaler    -> 3MHz
 static void SystemClock_Config()
 {
 	uint32_t	HSE_Status;

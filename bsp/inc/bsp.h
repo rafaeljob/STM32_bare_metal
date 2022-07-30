@@ -27,4 +27,7 @@ uint8_t BSP_PB_GetState(void);
 // Debug console functions
 void BSP_Console_Init(void);
 
+// ADC functions
+void BSP_ADC_Init(void);
+
 #endif /* __BSP_H__ */
