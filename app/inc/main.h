@@ -15,4 +15,7 @@
 //  FUNCTION
 //////////////////////////////////////////////
 
+int bm_printf(const char *format, ...);
+int bm_sprintf(char *out, const char *format, ...);
+
 #endif /* __MAIN_H__ */

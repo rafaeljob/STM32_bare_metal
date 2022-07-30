@@ -18,36 +18,46 @@ static void SystemClock_Config(void);
 // Main program
 int main()
 {
+	uint8_t	sent;
+
 	// Configure System Clock
 	SystemClock_Config();
 
-	// Initialize LED pin
+	// Initialize Debug Console
+	BSP_Console_Init();
+	bm_printf("# Console ready\r\n");
+
+	// Initialize LED & Button pin
 	BSP_LED_Init();
+	bm_printf("# Led ready\r\n");
 
-	// Initialize User-Button pin
 	BSP_PB_Init();
+	bm_printf("# Push-button ready\r\n");
 
-	// Turn LED On
-	BSP_LED_On();
-
-	// Turn LED Off
-	BSP_LED_Off();
-
+	// Main loop
 	while(1)
 	{
-		// Turn LED On if User-Button is pushed down
+		// If User-Button is pushed down
 		if (BSP_PB_GetState() == 1)
 		{
-			BSP_LED_On();
+			BSP_LED_On();	// Keep LED On
+
+			// Send '#' only once
+			if (sent == 0)
+			{
+				while ((USART2->ISR & USART_ISR_TC) != USART_ISR_TC);
+				USART2->TDR = '#';
+				sent = 1;
+			}
 		}
 
-		// Otherwise turn LED Off
+		// If User-Button is released
 		else
 		{
-			BSP_LED_Off();
+			BSP_LED_Off();	// Keep LED Off
+			sent = 0;
 		}
 	}
-	//
 }
 
 
